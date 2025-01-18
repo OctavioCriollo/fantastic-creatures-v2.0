@@ -1,0 +1,123 @@
+services:
+  backend:
+    depends_on:
+      postgres:
+        condition: service_healthy    
+    build:
+      context: ./backend
+    restart: always
+    networks:
+      - backend
+      - frontend
+    #deploy:
+    #  replicas: 2
+    environment:
+      - DATABASE=${DATABASE}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      #- DB_HOST=${DB_HOST}
+      - DB_HOST=postgres
+      - SECRET_KEY=${SECRET_KEY}
+      - FLASK_ENV=${FLASK_ENV} 
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Clave de API de OpenAI
+      - OPENAI_ORG_ID=${OPENAI_ORG_ID}  # ID de la organización de OpenAI
+      - OPENAI_PROJECT_ID=${OPENAI_PROJECT_ID}  # ID del proyecto de OpenAI
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=gateway"
+      - "traefik.http.routers.${BACKEND_APP_ROUTER}.rule=Host(`${BACKEND_DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.${BACKEND_APP_ROUTER}.service=${BACKEND_APP_SERVICE}"
+      - "traefik.http.routers.${BACKEND_APP_ROUTER}.entrypoints=websecure"
+      - "traefik.http.routers.${BACKEND_APP_ROUTER}.tls=true"
+      - "traefik.http.routers.${BACKEND_APP_ROUTER}.tls.certresolver=production-letsencrypt"
+      - "traefik.http.services.${BACKEND_APP_SERVICE}.loadbalancer.server.port=5000"
+      #- "traefik.http.services.${BACKEND_APP_SERVICE}.loadbalancer.method=leastrequest"
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: always
+    networks:
+      - backend
+      - frontend
+    #deploy:
+    #  replicas: 1
+
+    environment:
+      - REACT_APP_BACKEND_API_URL=${REACT_APP_BACKEND_API_URL} 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=gateway"
+      - "traefik.http.routers.${FRONTEND_APP_ROUTER}.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.${FRONTEND_APP_ROUTER}.service=${FRONTEND_APP_SERVICE}"
+      - "traefik.http.routers.${FRONTEND_APP_ROUTER}.entrypoints=websecure"
+      - "traefik.http.routers.${FRONTEND_APP_ROUTER}.tls=true"
+      - "traefik.http.routers.${FRONTEND_APP_ROUTER}.tls.certresolver=production-letsencrypt"
+      - "traefik.http.services.${FRONTEND_APP_SERVICE}.loadbalancer.server.port=80"
+      #- "traefik.http.services.${FRONTEND_APP_SERVICE}.loadbalancer.method=leastrequest"
+
+  postgres:
+    image: postgres:16.1
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DATABASE}
+    volumes:
+      - db_storage:/var/lib/postgresql/data
+      - ./init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h postgres -U ${DB_USER} -d ${DATABASE}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+  pgadmin:
+    image: elestio/pgadmin:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    networks:
+      - backend
+      - frontend
+    volumes:
+        - ./servers.json:/pgadmin4/servers.json
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=gateway"
+      - "traefik.http.routers.${PGADMIN_APP_ROUTER}.rule=Host(`${PGADMIN_DOMAIN}`)"  # Aquí puedes usar un dominio para pgAdmin
+      - "traefik.http.routers.${PGADMIN_APP_ROUTER}.service=${PGADMIN_APP_SERVICE}"
+      - "traefik.http.routers.${PGADMIN_APP_ROUTER}.entrypoints=websecure"
+      - "traefik.http.routers.${PGADMIN_APP_ROUTER}.tls=true"
+      - "traefik.http.routers.${PGADMIN_APP_ROUTER}.tls.certresolver=production-letsencrypt"
+      - "traefik.http.services.${PGADMIN_APP_SERVICE}.loadbalancer.server.port=80"  # El puerto de pgAdmin es el 80
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redis:
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - redis_storage:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+networks:
+  backend:
+  frontend:
+    external: true
+    name: gateway
+    driver: bridge
+
+volumes:
+  db_storage:
+  redis_storage:

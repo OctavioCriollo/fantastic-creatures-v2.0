@@ -20,7 +20,7 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '5000',
+        port: '8000',       //API Port (Flask Server)
         pathname: '/**',
       },
       {

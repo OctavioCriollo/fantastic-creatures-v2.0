@@ -19,9 +19,14 @@ services:
       - DB_HOST=postgres
       - SECRET_KEY=${SECRET_KEY}
       - FLASK_ENV=${FLASK_ENV} 
+      - FLASK_ENV=production  # Aseguramos que esté en modo producción
+      - FLASK_APP=app.py  # Especificamos el archivo principal de la aplicación
+      - GUNICORN_WORKERS=4  # Número de workers de Gunicorn
       - OPENAI_API_KEY=${OPENAI_API_KEY}  # Clave de API de OpenAI
       - OPENAI_ORG_ID=${OPENAI_ORG_ID}  # ID de la organización de OpenAI
       - OPENAI_PROJECT_ID=${OPENAI_PROJECT_ID}  # ID del proyecto de OpenAI
+    #command: gunicorn --workers ${GUNICORN_WORKERS} --bind 0.0.0.0:8000 app:app
+    
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=gateway"
@@ -30,9 +35,9 @@ services:
       - "traefik.http.routers.${BACKEND_APP_ROUTER}.entrypoints=websecure"
       - "traefik.http.routers.${BACKEND_APP_ROUTER}.tls=true"
       - "traefik.http.routers.${BACKEND_APP_ROUTER}.tls.certresolver=production-letsencrypt"
-      - "traefik.http.services.${BACKEND_APP_SERVICE}.loadbalancer.server.port=5000"
+      - "traefik.http.services.${BACKEND_APP_SERVICE}.loadbalancer.server.port=8000"
       #- "traefik.http.services.${BACKEND_APP_SERVICE}.loadbalancer.method=leastrequest"
-
+  
   frontend:
     build:
       context: ./frontend
@@ -42,9 +47,9 @@ services:
       - frontend
     #deploy:
     #  replicas: 1
-
     environment:
-      - REACT_APP_BACKEND_API_URL=${REACT_APP_BACKEND_API_URL} 
+      - NEXT_PUBLIC_BACKEND_API_URL=${NEXT_PUBLIC_BACKEND_API_URL}  
+      - NODE_ENV=production
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=gateway"
@@ -53,7 +58,7 @@ services:
       - "traefik.http.routers.${FRONTEND_APP_ROUTER}.entrypoints=websecure"
       - "traefik.http.routers.${FRONTEND_APP_ROUTER}.tls=true"
       - "traefik.http.routers.${FRONTEND_APP_ROUTER}.tls.certresolver=production-letsencrypt"
-      - "traefik.http.services.${FRONTEND_APP_SERVICE}.loadbalancer.server.port=80"
+      - "traefik.http.services.${FRONTEND_APP_SERVICE}.loadbalancer.server.port=3000"
       #- "traefik.http.services.${FRONTEND_APP_SERVICE}.loadbalancer.method=leastrequest"
 
   postgres:
@@ -75,16 +80,20 @@ services:
       - backend
 
   pgadmin:
-    image: elestio/pgadmin:latest
+    image: dpage/pgadmin4:latest  # Using the official pgAdmin image
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'True'
     networks:
       - backend
       - frontend
     volumes:
-        - ./servers.json:/pgadmin4/servers.json
+      - pgadmin_data:/var/lib/pgadmin
+      - ./servers.json:/pgadmin4/servers.json:ro
+
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=gateway"
@@ -94,10 +103,12 @@ services:
       - "traefik.http.routers.${PGADMIN_APP_ROUTER}.tls=true"
       - "traefik.http.routers.${PGADMIN_APP_ROUTER}.tls.certresolver=production-letsencrypt"
       - "traefik.http.services.${PGADMIN_APP_SERVICE}.loadbalancer.server.port=80"  # El puerto de pgAdmin es el 80
+      - "traefik.http.routers.${PGADMIN_APP_ROUTER}.middlewares=pgadmin-auth"
+      - "traefik.http.middlewares.pgadmin-auth.basicauth.users=${PGADMIN_BASIC_AUTH_USERS}"
     depends_on:
       postgres:
         condition: service_healthy
-
+  
   redis:
     image: redis:6-alpine
     restart: always
@@ -121,3 +132,4 @@ networks:
 volumes:
   db_storage:
   redis_storage:
+  pgadmin_data: 

@@ -50,6 +50,7 @@ const HomePage = () => {
   }, [clientName, birthDate, creature]);
 
   const handleGenerateCreature = async () => {
+    
     if (!clientName) {
       setMessage('Se requiere el nombre.');
       return;
@@ -65,6 +66,8 @@ const HomePage = () => {
       return;
     }
 
+
+    setMessage('ESTAS AQUI');
     // Clear existing creature data
     setCreature(null);
     setShowDescription(false);
@@ -180,8 +183,8 @@ const HomePage = () => {
               variant="filled"
               multiline
               rows={2}
-              minRows={2}
-              maxRows={2}
+              //minRows={2}
+              //maxRows={2}
               sx={{ mt: 2 }}
               InputProps={{
                 disableUnderline: true,

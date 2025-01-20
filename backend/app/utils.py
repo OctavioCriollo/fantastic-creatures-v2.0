@@ -5,6 +5,7 @@ import segno
 import io
 import os
 import requests
+import re
 
 
 from datetime import datetime
@@ -146,7 +147,7 @@ def AI_description_creature_generator(client_name, birth_date, creature_details)
     # Utiliza la nueva interfaz de la API GPT-4
     chat_completion = client_openAI.chat.completions.create(
         model="gpt-4",
-        max_tokens=500,
+        max_tokens=1000,
         n=1,
         stop=None,
         temperature=0.75,
@@ -164,17 +165,8 @@ def AI_description_creature_generator(client_name, birth_date, creature_details)
     print(f"RESPUESTA DE CHATGPT:\n")
     print(f"{generated_text}\n")
 
-    # Dividir el texto en nombre y descripción
-    try:
-        name_start = generated_text.index("Nombre: ") + len("Nombre: ")
-        description_start = generated_text.index("Descripción: ")
 
-        creature_name = generated_text[name_start:description_start].strip()
-        creature_description = generated_text[description_start + len("Descripción: "):].strip()
-    except ValueError:
-        # Manejar el caso donde el formato no es como se esperaba
-        creature_name = "Unknown Creature"
-        creature_description = generated_text
+    creature_name, creature_description = parse_generated_text(generated_text)
 
     # Generar un número único para la criatura
     unique_number = spin_wheel()
@@ -335,3 +327,19 @@ def generate_qr_code(Creature, client_name, birth_date):
     # Assign the generated URL to the creature's attribute
     Creature.QR_code_url = qr_file_path
     return qr_file_path
+
+def parse_generated_text(generated_text):
+    try:
+        # Buscar el nombre de la criatura usando una expresión regular
+        name_match = re.search(r"Nombre:\s*(.+)", generated_text)
+        creature_name = name_match.group(1).strip() if name_match else "Unknown Creature"
+        
+        # Buscar la descripción de la criatura usando otra expresión regular
+        description_match = re.search(r"Descripción:\s*(.+)", generated_text, re.DOTALL)
+        creature_description = description_match.group(1).strip() if description_match else generated_text.strip()
+
+        return creature_name, creature_description
+    except Exception as e:
+        # Manejar cualquier error inesperado
+        print(f"Error al procesar el texto: {e}")
+        return "Unknown Creature", generated_text.strip()

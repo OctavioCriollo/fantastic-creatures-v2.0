@@ -18,7 +18,7 @@ services:
       #- DB_HOST=${DB_HOST}
       - DB_HOST=postgres
       - SECRET_KEY=${SECRET_KEY}
-      - FLASK_ENV=${FLASK_ENV} 
+      #- FLASK_ENV=${FLASK_ENV} 
       - FLASK_ENV=production  # Aseguramos que esté en modo producción
       - FLASK_APP=app.py  # Especificamos el archivo principal de la aplicación
       - GUNICORN_WORKERS=4  # Número de workers de Gunicorn

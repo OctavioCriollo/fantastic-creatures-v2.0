@@ -40,7 +40,7 @@ ENV DOCKERIZED=True
 RUN apt-get update && apt-get clean && rm -rf /var/lib/apt/lists/*
     
 # Comando para ejecutar la aplicación usando Gunicorn
-CMD ["gunicorn", "app:app()", \
+CMD ["gunicorn", "app:app", \
      "-w", "1", \
      "-b", "0.0.0.0:8000", \
      "--timeout", "120", \

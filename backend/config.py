@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 # Cargar variables de entorno
-load_dotenv()
+load_dotenv(override=True)
 
 # Configuración de la base de datos usando PostgreSQL
 DATABASE = os.environ.get('DATABASE')

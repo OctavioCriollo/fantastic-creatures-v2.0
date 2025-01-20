@@ -5,7 +5,6 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 
-from dotenv import load_dotenv
 import os
 
 # Inicializamos las extensiones
@@ -15,7 +14,7 @@ ma = Marshmallow()  # Crea una instancia de Marshmallow
 
 def create_app(config_name='default'):
     # Cargar las variables de entorno
-    load_dotenv()
+    #load_dotenv(override=True)
 
     # Verifica que FLASK_ENV esté correctamente asignada desde el .env
     print(f"FLASK_ENV: {os.getenv('FLASK_ENV')}") 

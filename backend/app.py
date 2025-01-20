@@ -7,9 +7,8 @@ from database import db_initialize
 from app.routes import *
 
 ## Cargar el archivo .env solo si no estamos en un contenedor Docker
-if not os.getenv('DOCKERIZED', False):
-    load_dotenv()
-
+#if not os.getenv('DOCKERIZED', False):
+load_dotenv(override=True)      #Carva las variables de entorno una unica vez y las sobreescribe si existen
 #################################################################
 # Seleccionar configuración en base al entorno                  #
 config_name = os.getenv('FLASK_ENV') or 'default'               #

@@ -28,8 +28,7 @@ interface Creature {
 }
 
 const PAYMENT_AMOUNT = 199
-//const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL
-const API_URL = 'http://localhost:8000'
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL
 
 const HomePage = () => {
   const [generateMessage, setGenerateMessage] = useState<string>("")

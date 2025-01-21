@@ -140,8 +140,40 @@ def AI_description_creature_generator(client_name, birth_date, creature_details)
         Por favor, entrega la respuesta en el siguiente formato:
 
         Nombre: [nombre mágico de la criatura]
-        Descripción: [Cuenta una historia mágica y emocionante de no más de 300 palabras, como si le estuvieras hablando a {client_name} directamente bajo el cielo estrellado. La narrativa debe ser suave y envolvente, asegurando que esta criatura se convierta en el amigo mágico y especial que {client_name} siempre ha soñado].
+        Descripción: [Cuenta una historia mágica y emocionante de no más de 200 palabras, como si le estuvieras hablando a {client_name} directamente bajo el cielo estrellado. La narrativa debe ser suave y envolvente, asegurando que esta criatura se convierta en el amigo mágico y especial que {client_name} siempre ha soñado].
     """
+    
+    prompt4 = f"""
+        Crear una criatura mágica, mítica y única. que sea el compañero perfecto para {client_name}, una amiga mágica, alguien que siempre estará a tu lado, acompañándote en tus aventuras y compartiendo contigo secretos. Utiliza un estilo narrativo que recuerde a un narrador contando historias para niños. 
+        Evitar mencionar repetitivamente el {client_name} o el nombre de la criatura.
+
+        La criatura estara basada en los siguientes detalles:
+        - **Relación con el usuario**: La criatura mágica debe acompañar a {client_name} en sus aventuras, estar a su lado en momentos de alegría y calma, y ser un amigo fiel con quien siempre pueda contar.
+        - **Fecha de nacimiento**: {birth_date} (Número de Vida: {life_number}).
+        - **Detalles adicionales**: Si en {creature_details} se mencionan varias criaturas o características, combínalas para crear una criatura híbrida increíble cuya apariencia mágica fascine a {client_name}.
+
+        La criatura debe ser hermosa y amigable, una con quien {client_name} pueda soñar, jugar y sentir una conexión especial. El nombre de la criatura debe ser único, mágico, y no incluir el nombre del usuario.
+
+        # Descripción de la Criatura
+
+        Crea una descripción que capture la magia de esta criatura como si estuvieras hablándole directamente a {client_name}, de 2 a 8 años. La criatura debe ser una compañera perfecta, con habilidades asombrosas, una personalidad encantadora, y un aspecto tan maravilloso que {client_name} quiera tenerla siempre consigo.
+
+        - **Apariencia**: Describe de manera mágica y detallada cómo se ve la criatura (colores, forma, detalles únicos).
+        - **Habilidades**: Explica sus habilidades mágicas o especiales y cómo son beneficiosas para {client_name}.
+        - **Personalidad**: Describe si es juguetona, protectora, curiosa y cómo interactúa con {client_name}.
+        - **Conexión Astrológica**: Incluye una conexión astrológica basada en la fecha de nacimiento del usuario, reflejando la sabiduría y magia ancestral de la criatura.
+
+        # Output Format
+
+        - Nombre: [nombre mágico de la criatura]
+        - Descripción: [Cuenta una historia mágica y emocionante de no más de 200 palabras, hablándole a {client_name} bajo el cielo estrellado.]
+
+        # Notes
+
+        - Asegúrate de usar un lenguaje apropiado para niños entre 2 y 8 años.
+        - Mantén la narrativa suave y envolvente, convirtiendo la criatura en un amigo mágico para {client_name}.
+    """
+
 
 
     # Utiliza la nueva interfaz de la API GPT-4
@@ -154,7 +186,7 @@ def AI_description_creature_generator(client_name, birth_date, creature_details)
         messages=[
             #{"role": "system", "content": "You are a helpful assistant."},
             {"role": "system", "content": 
-             """Eres un experto creador experto de criaturas mágicas, mitologicas y fantásticas."""
+             """Eres un experto creador de criaturas mágicas, mitologicas y fantásticas."""
             },
             {"role": "user", "content": prompt3}
         ]
@@ -164,7 +196,6 @@ def AI_description_creature_generator(client_name, birth_date, creature_details)
     generated_text = chat_completion.choices[0].message.content.strip()
     print(f"RESPUESTA DE CHATGPT:\n")
     print(f"{generated_text}\n")
-
 
     creature_name, creature_description = parse_generated_text(generated_text)
 
@@ -227,15 +258,34 @@ def AI_image_creature_generator(description):
         la atención de la criatura. Asegúrate de que el entorno natural complemente y realce la apariencia de la criatura.
 
         La imagen final debe transmitir una sensación de asombro e intriga, capturando la esencia física de la criatura en un entorno realista y vívido, 
-        sin distracciones de texto, gráficos o elementos artificiales.
-        **NO DEBE HABER NINGÚN TEXTO EN LA IMAGEN FINAL**.
+        sin distracciones de texto, gráficos o elementos artificiales. La criatura debe ser el ÚNICO enfoque de la imagen.
         """
     
     prompt_no_text  =f"""
-        NO TEXT. This image must contain NO TEXT, titles, symbols, or graphics of any kind.
-        The creature is the ONLY focus of the image. There should be NO written language or characters anywhere in the image.
+        **NO DEBE HABER NINGÚN TEXTO EN LA IMAGEN FINAL**.
+        TEXTOS, títulos, símbolos ni gráficos de ningún tipo.
+        NO tiene que haber ningún lenguaje escrito ni caracteres en ninguna parte de la imagen
         """
-                
+
+    prompt2  =f"""
+        Crea una imagen altamente detallada y fotorrealista de una criatura única basada únicamente en su apariencia física descrita en {description}. 
+
+        - Ignora cualquier información sobre habilidades, poderes, vida o aspectos astrológicos. Concéntrate exclusivamente en las características físicas de la criatura, como tamaño, forma, textura de piel, escamas, pelaje, plumas, colores y otras características visibles.
+        - La representación debe ser de cuerpo completo, mostrando la criatura por completo, con todos sus rasgos distintivos y texturas claramente visibles.
+        - No incluyas ningún texto, símbolos, gráficos adicionales o detalles que no formen parte del aspecto físico de la criatura.
+        - Ubica la criatura en un hábitat natural que se adapte a sus características físicas, como un bosque, una montaña, un desierto, o un océano. El fondo debe estar ligeramente desenfocado para proporcionar profundidad sin distraer de la criatura.
+        - Asegúrate de que el entorno natural complemente y realce la apariencia de la criatura.
+
+        # Objetivo de la Imagen
+
+        La imagen final debe transmitir una sensación de asombro e intriga, capturando la esencia física de la criatura en un entorno realista y vívido, sin distracciones de texto o elementos artificiales. La criatura debe ser el único enfoque de la imagen.
+
+        # Notas
+
+        - No debe haber ningún texto, títulos, símbolos ni gráficos de ningún tipo en la imagen final.
+        - Evitar distracciones que no sean el entorno natural y la criatura misma.
+        """
+
     #image_size = os.getenv('IMAGE_SIZE', '512x512')  # Usa el valor de .env o un valor predeterminado
     image_response = client_openAI.images.generate(
         model="dall-e-3",
@@ -285,7 +335,7 @@ def generate_qr_code(Creature, client_name, birth_date):
     qr_img = Image.open(buffer)
 
     # Resize the QR code to fit the entire white space
-    qr_size = 250  # Desired size of the QR code
+    qr_size = 300  # Desired size of the QR code
     qr_img = qr_img.resize((qr_size, qr_size), Image.LANCZOS)
 
     # Calculate position to center the QR code
@@ -327,6 +377,7 @@ def generate_qr_code(Creature, client_name, birth_date):
     # Assign the generated URL to the creature's attribute
     Creature.QR_code_url = qr_file_path
     return qr_file_path
+   
 
 def parse_generated_text(generated_text):
     try:
@@ -334,9 +385,42 @@ def parse_generated_text(generated_text):
         name_match = re.search(r"Nombre:\s*(.+)", generated_text)
         creature_name = name_match.group(1).strip() if name_match else "Unknown Creature"
         
+        # Eliminar comas y puntos del nombre
+        creature_name = re.sub(r"[.,]", "", creature_name)
+        
         # Buscar la descripción de la criatura usando otra expresión regular
         description_match = re.search(r"Descripción:\s*(.+)", generated_text, re.DOTALL)
         creature_description = description_match.group(1).strip() if description_match else generated_text.strip()
+
+        return creature_name, creature_description
+    except Exception as e:
+        # Manejar cualquier error inesperado
+        print(f"Error al procesar el texto: {e}")
+        return "Unknown Creature", generated_text.strip()
+
+
+def parse_generated_text_old(generated_text):
+    try:
+        # Buscar el nombre de la criatura usando una expresión regular
+        name_match = re.search(r"Nombre:\s*(.+)", generated_text)
+        creature_name = name_match.group(1).strip() if name_match else "Unknown Creature"
+        
+        # Eliminar comas y puntos del nombre
+        creature_name = re.sub(r"[.,]", "", creature_name)
+        
+        # Buscar la descripción de la criatura usando otra expresión regular
+        description_match = re.search(r"Descripción:\s*(.+)", generated_text, re.DOTALL)
+        raw_description = description_match.group(1).strip() if description_match else generated_text.strip()
+        
+        # Separar la descripción en párrafos basados en puntos y saltos de línea
+        def separar_parrafos(texto):
+            # Dividir por puntos seguidos de espacio o salto de línea
+            partes = re.split(r"\.\s*|\n", texto)
+            # Quitar espacios adicionales y omitir partes vacías
+            parrafos = [parte.strip() for parte in partes if parte.strip()]
+            return "\n\n".join(parrafos)
+
+        creature_description = separar_parrafos(raw_description)
 
         return creature_name, creature_description
     except Exception as e:

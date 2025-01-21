@@ -1,8 +1,8 @@
-/** @type {import('next').NextConfig} */
+import type { NextConfig } from "next";
 const NEXT_PUBLIC_BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL
 const backendUrl = NEXT_PUBLIC_BACKEND_API_URL ? new URL(NEXT_PUBLIC_BACKEND_API_URL) : null;
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
@@ -23,4 +23,7 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
+
+
 

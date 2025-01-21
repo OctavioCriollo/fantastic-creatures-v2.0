@@ -3,9 +3,10 @@
 import React, { useState, useCallback } from "react"
 import { generateCreature, buyCreature } from "@/api/api"
 import { ClipLoader } from "react-spinners"
-import { Button, TextField, Typography, Container, Box, Grid, Alert } from "@mui/material"
+import { Button, TextField, Typography, Container, Box, Alert, Stack } from "@mui/material"
 import Image from "next/image"
 import { createTheme, ThemeProvider } from "@mui/material/styles"
+import { FlipCard } from "./components/FlipCard"
 
 const theme = createTheme({
   breakpoints: {
@@ -26,74 +27,76 @@ interface Creature {
   unique_number: string
 }
 
-const PAYMENT_AMOUNT = 299
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL
+const PAYMENT_AMOUNT = 199
+//const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL
+const API_URL = 'http://localhost:8000'
 
 const HomePage = () => {
-  const [message, setMessage] = useState<string>("")
+  const [generateMessage, setGenerateMessage] = useState<string>("")
+  const [donateMessage, setDonateMessage] = useState<string>("")
   const [clientName, setClientName] = useState<string>("")
   const [birthDate, setBirthDate] = useState<string>("")
   const [creatureDetails, setCreatureDetails] = useState<string>("")
   const [creature, setCreature] = useState<Creature | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
+  const [buyingLoading, setBuyingLoading] = useState<boolean>(false)
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
   const [showDescription, setShowDescription] = useState<boolean>(false)
   const [isDateFocused, setIsDateFocused] = useState(false)
 
   const handleBuyCreature = useCallback(async () => {
     if (!creature) {
-      setMessage("Please generate a creature first.")
+      setDonateMessage("Please generate a creature first.")
       return
     }
-    setLoading(true)
+    setBuyingLoading(true)
     try {
       const data = await buyCreature(clientName, "", birthDate, creature)
-      setMessage(data.message)
+      setDonateMessage(data.message)
       setQrCodeUrl(data.QR_code_url)
     } catch (error: unknown) {
       if (error instanceof Error) {
-        setMessage(error.message)
+        setDonateMessage(error.message)
       } else {
-        setMessage("An unexpected error occurred.")
+        setDonateMessage("An unexpected error occurred.")
       }
     } finally {
-      setLoading(false)
+      setBuyingLoading(false)
     }
   }, [clientName, birthDate, creature])
 
   const handleGenerateCreature = async () => {
     if (!clientName) {
-      setMessage("Se requiere el nombre.")
+      setGenerateMessage("Se requiere el nombre.")
       return
     }
 
     if (!birthDate) {
-      setMessage("Se requiere la fecha de nacimiento.")
+      setGenerateMessage("Se requiere la fecha de nacimiento.")
       return
     }
 
     if (!creatureDetails) {
-      setMessage("Se requieren los detalles de la criatura.")
+      setGenerateMessage("Se requieren los detalles de la criatura.")
       return
     }
 
-    setMessage("ESTAS AQUI")
+    setGenerateMessage("")
+    setDonateMessage("")
     // Clear existing creature data
     setCreature(null)
     setShowDescription(false)
-    setMessage("")
     setQrCodeUrl("")
     setLoading(true)
 
     try {
       const data = await generateCreature(clientName, birthDate, "", creatureDetails)
       setCreature(data)
-      setMessage("")
     } catch (error: unknown) {
       if (error instanceof Error) {
-        setMessage(error.message)
+        setGenerateMessage(error.message)
       } else {
-        setMessage("An unexpected error occurred while generating the creature.")
+        setGenerateMessage("An unexpected error occurred while generating the creature.")
       }
     } finally {
       setLoading(false)
@@ -112,14 +115,17 @@ const HomePage = () => {
         sx={{
           background: "linear-gradient(180deg, #0D3F4D 0%, #0A2F3A 100%)",
           minHeight: "100vh",
+          height: "100vh",
+          //minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          pt: 4, // Solo padding top
+          //justifyContent: "flex-start",
+          pt: 4,
         }}
       >
         {/* Header Section */}
-        <Box sx={{ maxWidth: "800px", width: "100%", mb: 4, px: 2 }}>
+        <Box sx={{ maxWidth: "800px", width: "100%", mb: 2, px: 2 }}>
           <Typography
             variant="h4"
             align="center"
@@ -138,7 +144,7 @@ const HomePage = () => {
             sx={{
               color: "#B0BEC5",
               fontSize: "14px",
-              mb: "5px", // Add 5px of margin at the bottom
+              mb: "5px",
             }}
           >
             Crea tu criatura mágica y mitológica basado en tu fecha de nacimiento y tu nombre. Ingresa abajo.
@@ -147,17 +153,14 @@ const HomePage = () => {
 
         {/* Form Section */}
         <Box sx={{ maxWidth: "800px", width: "100%", mb: 4, px: 2 }}>
-          {" "}
-          {/* Padding is px:2 */}
-          <Grid container spacing={1}>
-            <Grid item xs={12} sm={6}>
+          <Stack spacing={2} width="100%">
+            <Box display="flex" flexDirection={["column", "row"]} gap={2}>
               <TextField
                 fullWidth
                 placeholder="Full Name"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 variant="filled"
-                sx={{ mb: 2 }}
                 InputProps={{
                   disableUnderline: true,
                   sx: {
@@ -166,7 +169,7 @@ const HomePage = () => {
                     "&:hover": { bgcolor: "white" },
                     "&.Mui-focused": { bgcolor: "white" },
                     "& input": {
-                      padding: "8px 14px",
+                      padding: "10px 14px",
                     },
                     "& input::placeholder": {
                       opacity: 0.7,
@@ -175,8 +178,6 @@ const HomePage = () => {
                   },
                 }}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
                 type="date"
@@ -204,7 +205,7 @@ const HomePage = () => {
                     "&:hover": { bgcolor: "white" },
                     "&.Mui-focused": { bgcolor: "white" },
                     "& input": {
-                      padding: "8px 14px",
+                      padding: "10px 14px",
                       "&::-webkit-datetime-edit": {
                         color: isDateFocused || birthDate ? "inherit" : "transparent",
                       },
@@ -227,34 +228,31 @@ const HomePage = () => {
                   },
                 }}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                placeholder="Define Your Creature"
-                value={creatureDetails}
-                onChange={(e) => setCreatureDetails(e.target.value)}
-                variant="filled"
-                sx={{ mt: 2 }}
-                InputProps={{
-                  disableUnderline: true,
-                  sx: {
-                    borderRadius: "8px",
-                    bgcolor: "white",
-                    "&:hover": { bgcolor: "white" },
-                    "&.Mui-focused": { bgcolor: "white" },
-                    "& input": {
-                      padding: "16px 14px",
-                    },
-                    "& input::placeholder": {
-                      opacity: 0.7,
-                      color: "rgba(0, 0, 0, 0.6)",
-                    },
+            </Box>
+            <TextField
+              fullWidth
+              placeholder="Define Your Creature"
+              value={creatureDetails}
+              onChange={(e) => setCreatureDetails(e.target.value)}
+              variant="filled"
+              InputProps={{
+                disableUnderline: true,
+                sx: {
+                  borderRadius: "8px",
+                  bgcolor: "white",
+                  "&:hover": { bgcolor: "white" },
+                  "&.Mui-focused": { bgcolor: "white" },
+                  "& input": {
+                    padding: "16px 14px",
                   },
-                }}
-              />
-            </Grid>
-          </Grid>
+                  "& input::placeholder": {
+                    opacity: 0.7,
+                    color: "rgba(0, 0, 0, 0.6)",
+                  },
+                },
+              }}
+            />
+          </Stack>
           <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
             <Button
               variant="contained"
@@ -281,11 +279,20 @@ const HomePage = () => {
               </Box>
             </Button>
           </Box>
-          {message && (
-            <Box sx={{ mt: 2, width: "100%", textAlign: "center" }}>
-              <Alert severity="warning">{message}</Alert>
+          
+        
+
+          {generateMessage && (
+            <Box sx={{ mt: 3, display: "flex", justifyContent: "center", width: "100%" }}>
+              <Alert 
+                severity={generateMessage.includes("error") ? "error" : "warning"} 
+                sx={{ display: "flex", textAlign: "center", maxWidth: "100%", padding: "8px 16px" }}
+              >
+                {generateMessage}
+              </Alert>
             </Box>
           )}
+
         </Box>
 
         {loading && (
@@ -300,7 +307,7 @@ const HomePage = () => {
           <Box
             sx={{
               width: "100%",
-              mt: 4,
+              mt: "0px",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -313,11 +320,32 @@ const HomePage = () => {
                 color: "white",
                 textTransform: "uppercase",
                 fontWeight: 700,
-                mb: 2,
+                mb: 0.5,
                 px: 2,
               }}
             >
               {creature.name}
+            </Typography>
+            <Typography
+              sx={{
+                color: "white",
+                mb: 0,
+                textAlign: "center",
+              }}
+            >
+              <strong>Creature Number:</strong> {creature.unique_number}
+            </Typography>
+            <Typography
+              sx={{
+                color: "rgba(255, 255, 255, 0.5)",
+                mt: 1,
+                mb: 0,
+                textAlign: "center",
+                cursor: "pointer",
+              }}
+              onClick={toggleDescription}
+            >
+              Click para {showDescription ? "ver la imagen" : "ver la descripción"}
             </Typography>
 
             {/* Full width container for FlipCard */}
@@ -332,6 +360,7 @@ const HomePage = () => {
                 left: "50%",
                 position: "relative",
                 transform: "translateX(-50%)",
+                mt: 1,
               }}
             >
               <FlipCard
@@ -346,55 +375,46 @@ const HomePage = () => {
             <Box
               sx={{
                 width: "100%",
-                bgcolor: "rgba(0, 0, 0, 0.3)", // Darker semi-transparent background
+                bgcolor: "rgba(0, 0, 0, 0.3)",
                 mt: 4,
-                py: 4, // Add vertical padding
+                py: 4,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
               }}
             >
-              <Typography
-                sx={{
-                  color: "white",
-                  mb: 2,
-                  textAlign: "center",
-                  cursor: "pointer",
-                }}
-                onClick={toggleDescription}
-              >
-                Click para {showDescription ? "ver la imagen" : "ver la descripción"}
-              </Typography>
-
-              <Typography
-                sx={{
-                  color: "white",
-                  mb: 4,
-                  textAlign: "center",
-                }}
-              >
-                <strong>Creature Number:</strong> {creature.unique_number}
-              </Typography>
-
-              <Box sx={{ textAlign: "center" }}>
-                <Typography variant="h6" sx={{ color: "white", mb: 1 }}>
-                  Purchase Creature
-                </Typography>
-                <Typography sx={{ color: "#ddd", mb: 2 }}>Price: ${PAYMENT_AMOUNT / 100} USD</Typography>
+              <Box sx={{ textAlign: "center", mb: 0, mt: 1 }}>         
                 <Button
                   variant="contained"
                   onClick={handleBuyCreature}
+                  disabled={buyingLoading}
                   sx={{
                     bgcolor: "#CC24DE",
                     "&:hover": { bgcolor: "#B020BE" },
                     px: 4,
-                    py: 1.5,
+                    py: 1.2,
                     fontSize: "1rem",
                     fontWeight: 600,
                   }}
                 >
-                  Donate
+                  {buyingLoading ? (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <ClipLoader color="#ffffff" size={20} />
+                      Processing...
+                    </Box>
+                  ) : (
+                    "Donate"
+                  )}
                 </Button>
+                <Typography variant="h6" sx={{ color: "white", mb: 0, mt: 2 }}>
+                  Share or Donate
+                </Typography>
+                <Typography sx={{ color: "#ddd", mb: 0 }}>from ${PAYMENT_AMOUNT / 100} USD</Typography>
+                {donateMessage && (
+                  <Box sx={{ mt: 0, mb: 0, width: "auto", textAlign: "center" }}>
+                    <Alert severity={donateMessage.includes("error") ? "error" : "success"}>{donateMessage}</Alert>
+                  </Box>
+                )}
               </Box>
             </Box>
           </Box>
@@ -414,7 +434,7 @@ const HomePage = () => {
             />
             <Typography sx={{ color: "#ddd", mt: 2 }}>{`${API_URL}${qrCodeUrl}`}</Typography>
           </Box>
-        )}
+        )} 
       </Container>
     </ThemeProvider>
   )

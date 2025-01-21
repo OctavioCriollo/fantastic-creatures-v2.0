@@ -92,8 +92,9 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
               fill
               sizes="100vw"
               style={{
-                objectFit: "contain",
+                objectFit: "cover",
                 borderRadius: "20px", // Bordes redondeados para la imagen
+                //overflow: "hidden", // Esto asegura que la imagen respete el borde
               }}
               priority
             />
@@ -132,12 +133,24 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
                 color: "#fff",
                 fontSize: "16px",
                 lineHeight: 1.8,
-                textAlign: "justify",
-                width: "100%",
+                textAlign:   "justify",
+                textJustify: "inter-word",
+                hyphens: "auto",
+                
+                
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                wordBreak: "break-word",
+                display: "block",
+                padding: "2px",
+
+                
+                maxWidth: "100%",
                 marginTop: "48px",
                 marginBottom: "48px",
-                paddingTop: "24px",
-                paddingBottom: "24px",
+                paddingTop: "16px",
+                paddingBottom: "16px",
               }}
             >
               {description}

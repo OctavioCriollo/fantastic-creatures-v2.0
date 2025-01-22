@@ -112,19 +112,22 @@ const HomePage = () => {
         maxWidth={false}
         disableGutters
         sx={{
-          background: "linear-gradient(180deg, #0D3F4D 0%, #0A2F3A 100%)",
-          minHeight: "100vh",
-          height: "100vh",
+          //background: "linear-gradient(180deg, #0D3F4D 0%, #0A2F3A 100%)",
+          maxWidth: "760px",
+          minHeight: "100svh",
+          //height: "100vh",
+          height: "auto",
           //minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          //justifyContent: "flex-start",
+          justifyContent: "flex-start",
+          overflow: "hidden",
           pt: 4,
         }}
       >
         {/* Header Section */}
-        <Box sx={{ maxWidth: "800px", width: "100%", mb: 2, px: 2 }}>
+        <Box sx={{ maxWidth: "100%", width: "100%", mb: 2, px: 2 }}>
           <Typography
             variant="h4"
             align="center"
@@ -151,7 +154,7 @@ const HomePage = () => {
         </Box>
 
         {/* Form Section */}
-        <Box sx={{ maxWidth: "800px", width: "100%", mb: 4, px: 2 }}>
+        <Box sx={{ maxWidth: "100%", width: "100%", mb: 4, px: 2 }}>
           <Stack spacing={2} width="100%">
             <Box display="flex" flexDirection={["column", "row"]} gap={2}>
               <TextField
@@ -375,8 +378,8 @@ const HomePage = () => {
               sx={{
                 width: "100%",
                 bgcolor: "rgba(0, 0, 0, 0.3)",
-                mt: 4,
-                py: 4,
+                mt: 2,
+                py: 3,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -410,7 +413,7 @@ const HomePage = () => {
                 </Typography>
                 <Typography sx={{ color: "#ddd", mb: 0 }}>from ${PAYMENT_AMOUNT / 100} USD</Typography>
                 {donateMessage && (
-                  <Box sx={{ mt: 0, mb: 0, width: "auto", textAlign: "center" }}>
+                  <Box sx={{ mt: 2, mb: 0, width: "auto", textAlign: "center" }}>
                     <Alert severity={donateMessage.includes("error") ? "error" : "success"}>{donateMessage}</Alert>
                   </Box>
                 )}
@@ -420,7 +423,7 @@ const HomePage = () => {
         )}
 
         {qrCodeUrl && (
-          <Box sx={{ mt: 4, textAlign: "center", px: 2 }}>
+          <Box sx={{ mt: 2, textAlign: "center", px: 2 }}>
             <Typography variant="h6" sx={{ color: "white", mb: 2 }}>
               Your QR Code
             </Typography>

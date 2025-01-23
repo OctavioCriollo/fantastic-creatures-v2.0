@@ -195,7 +195,7 @@ const HomePage = () => {
         maxWidth={false}
         disableGutters
         sx={{
-          //maxWidth: "760px",
+          maxWidth: "760px",
           minHeight: "100svh",
           height: "auto",
           display: "flex",

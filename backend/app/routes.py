@@ -11,6 +11,7 @@ from .schemas import CreatureSchema
 from pathlib import Path
 import traceback
 import os
+from flask import jsonify, send_from_directory
 
 #STATIC_CREATURES_IMG_PATH = 'static/creatures'
 
@@ -58,6 +59,7 @@ def serve_creature_image(filename):
 
     # Servir el archivo usando send_from_directory
     return send_from_directory(creatures_file_path, filename)
+
 
 @main.route('/api', methods=['GET', 'POST'])
 def test_endpoint():

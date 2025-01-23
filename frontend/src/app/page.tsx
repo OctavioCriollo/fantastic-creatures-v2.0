@@ -1,6 +1,8 @@
 "use client"
 
-import React, { useState, useCallback, useMemo } from "react"
+//import React, { useState, useCallback, useMemo } from "react"
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react" // Modificado
+
 import { generateCreature, buyCreature } from "@/api/api"
 import { ClipLoader } from "react-spinners"
 import { Button, TextField, Typography, Container, Box, Alert, Stack } from "@mui/material"
@@ -44,7 +46,16 @@ const HomePage = () => {
   const [showDescription, setShowDescription] = useState<boolean>(false)
 
   const [isDateFocused, setIsDateFocused] = useState<boolean>(false) 
+  const creatureRef = useRef<HTMLDivElement>(null) // Nueva referencia
 
+  useEffect(() => {
+    if (creature && creatureRef.current) {
+      creatureRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      })
+    }
+  }, [creature])  
 
   const theme = useMemo(() => createTheme({
     breakpoints: {
@@ -386,7 +397,10 @@ const HomePage = () => {
 
         {/* Creature Display */}
         {!loading && creature && (
-          <Box sx={{ width: "100%", mt: "0px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <Box 
+            ref={creatureRef}  // Agregar referencia aquí
+            sx={{ width: "100%", mt: "0px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                          
             <Typography variant="h5" align="center" sx={{
               color: "white",
               textTransform: "uppercase",
@@ -434,10 +448,6 @@ const HomePage = () => {
                 onClick={toggleDescription}
               />
             </Box>
-
-
-
-
             <PurchaseSection />
           </Box>
         )}

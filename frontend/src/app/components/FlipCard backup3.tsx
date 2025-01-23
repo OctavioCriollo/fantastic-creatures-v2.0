@@ -3,20 +3,20 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Box, Typography, CircularProgress } from "@mui/material"
-import { SxProps } from "@mui/material/styles"
+import { SxProps } from "@mui/material/styles";
+
 
 interface FlipCardProps {
   imageUrl: string
   description: string
   isFlipped: boolean
   onClick: () => void
-  sx?: SxProps
+  sx?: SxProps;
 }
 
 export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFlipped, onClick }) => {
   const [currentHeight, setCurrentHeight] = useState<number>(400)
   const [imgStatus, setImgStatus] = useState<"loading" | "loaded" | "error">("loading")
-  const [aspectRatio, setAspectRatio] = useState<number>(1) // Nuevo estado añadido
 
   // Función debounce mejorada
   function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number) {
@@ -27,7 +27,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
     }
   }
 
-  // Cálculo preciso de altura (modificado)
+  // Cálculo preciso de altura
   useEffect(() => {
     const calculateHeight = () => {
       if (isFlipped) {
@@ -39,10 +39,8 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
         const paddingBottom = parseFloat(computedStyle.paddingBottom)
         
         return Math.ceil(txtElement.scrollHeight + paddingTop + paddingBottom)
-      } else {
-        const containerWidth = document.getElementById('image-container')?.offsetWidth || window.innerWidth
-        return Math.min(containerWidth / aspectRatio, window.innerHeight * 1)
       }
+      return Math.min(window.innerWidth * 0.9, window.innerHeight * 0.6)
     }
 
     const updateDimensions = () => setCurrentHeight(calculateHeight())
@@ -52,18 +50,17 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
     window.addEventListener("resize", debouncedUpdate)
     
     return () => window.removeEventListener("resize", debouncedUpdate)
-  }, [isFlipped, description, aspectRatio]) // Dependencia añadida
+  }, [isFlipped, description])
 
   return (
     <Box
-      id="image-container" // ID añadido para referencia
       role="button"
       aria-label={isFlipped ? "Ver imagen" : "Ver descripción"}
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       onClick={onClick}
       sx={{
-        width: "100%",
+        width: "100vw",
         height: `${currentHeight}px`,
         position: "relative",
         perspective: "1000px",
@@ -71,7 +68,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
         display: "flex",
         justifyContent: "center",
         margin: "0 auto",
-        //maxWidth: "1200px",
+        maxWidth: "1200px",
         cursor: "pointer",
         overflow: "hidden"
       }}
@@ -88,7 +85,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
           transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
-        {/* Frente - Imagen (modificado) */}
+        {/* Frente - Imagen */}
         <Box
           sx={{
             position: "absolute",
@@ -101,7 +98,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
             alignItems: "center",
             borderRadius: "20px",
             overflow: "hidden",
-            opacity: isFlipped ? 0.7 : 1, // Opacidad reducida cuando está girado
+            //bgcolor: "rgba(0,0,0,0.1)"
           }}
         >
           <Box sx={{ 
@@ -110,10 +107,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
             height: "100%",
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
-            //overflow: "hidden",
-            //objectFit: "cover",
-            
+            alignItems: "center"
           }}>
             <Image
               id="creature-image"
@@ -121,23 +115,13 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
               alt="Creature"
               fill
               sizes="100vw"
+              //sizes="(max-width: 768px) 100vw, 50vw"
               priority
-              onLoad={(e) => {
-                const img = e.target as HTMLImageElement
-                setImgStatus("loaded")
-                setAspectRatio(img.naturalWidth / img.naturalHeight) // Detección de relación de aspecto
-              }}
+              onLoadingComplete={() => setImgStatus("loaded")}
               onError={() => setImgStatus("error")}
               style={{
-                objectFit: "cover", // Cambiado de cover a contain
-                overflow: "hidden",
+                objectFit: "cover",
                 borderRadius: "20px",
-                marginTop: "0px",
-                marginBottom: "0px",
-                marginLeft: "0px",
-                marginRight: "0px",
-                padding: "0px",
-         
                 display: imgStatus === "loaded" ? "block" : "none",
               }}
             />
@@ -155,7 +139,7 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
               width: "100%",
               height: "100%",
               justifyContent: "center",
-              backgroundColor: "rgba(0, 0, 0, 0)",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
               overflow: "hidden"
             }}>
               <CircularProgress color="secondary" />
@@ -186,13 +170,13 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
           )}
         </Box>
 
-        {/* Reverso - Descripción (sin cambios) */}
+        {/* Reverso - Descripción */}
         <Box
           sx={{
             position: "absolute",
             width: "100%",
             height: "100%",
-            bgcolor: "rgba(243,244,246,0.8)",
+            bgcolor: "rgba(0,0,0,0.85)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -212,13 +196,14 @@ export const FlipCard: React.FC<FlipCardProps> = ({ imageUrl, description, isFli
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              //padding: "32px",
+              //boxSizing: "border-box"
             }}
           >
             <Typography
               id="creature-description"
               sx={{
-                //color: "#fff",
-                color: "#000",
+                color: "#fff",
                 fontSize: "16px",
                 //fontSize: "clamp(14px, 2vw, 18px)",
                 lineHeight: 1.8,
